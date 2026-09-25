@@ -18,14 +18,13 @@ body {
   font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
 }
 
-.escrow-board {
+.bounty-board {
   align-self: stretch;
   background:
-    linear-gradient(90deg, rgba(37, 97, 75, 0.18) 1px, transparent 1px),
-    linear-gradient(rgba(58, 72, 50, 0.16) 1px, transparent 1px),
-    #182019;
-  background-size: 42px 42px;
-  border: 1px solid #303d31;
+    linear-gradient(135deg, rgba(50, 92, 68, 0.18) 25%, transparent 25%) 0 0 / 28px 28px,
+    linear-gradient(225deg, rgba(111, 142, 85, 0.18) 25%, transparent 25%) 0 0 / 28px 28px,
+    #19251c;
+  border: 1px solid #314334;
   border-radius: 8px;
   display: grid;
   gap: 1rem;
@@ -33,7 +32,7 @@ body {
   padding: 1.25rem;
 }
 
-.escrow-board div {
+.bounty-board div {
   background: rgba(251, 252, 248, 0.95);
   border: 1px solid rgba(211, 219, 205, 0.76);
   border-radius: 8px;
@@ -41,20 +40,55 @@ body {
   padding: 0.95rem;
 }
 
-.escrow-board span {
-  color: #596452;
+.bounty-board span {
+  color: #4e6a3d;
   display: block;
   font-size: 0.76rem;
   font-weight: 760;
   text-transform: uppercase;
 }
 
-.escrow-board strong {
+.bounty-board strong {
   color: #161814;
   display: block;
   font-size: clamp(0.9rem, 1.4vw, 1.05rem);
   margin-top: 0.45rem;
   overflow-wrap: anywhere;
+}
+
+.difference-panel {
+  background: #ffffff;
+  border: 1px solid #d7dee9;
+  border-radius: 8px;
+  box-shadow: 0 18px 45px rgba(22, 34, 48, 0.06);
+  padding: 1.25rem;
+}
+
+@media (min-width: 768px) {
+  .difference-panel {
+    padding: 1.5rem;
+  }
+}
+
+.difference-panel div div {
+  background: #f7f9f3;
+  border: 1px solid #dce5d1;
+  border-radius: 8px;
+  min-height: 6rem;
+  padding: 1rem;
+}
+
+.difference-panel strong {
+  color: #161814;
+  display: block;
+  font-weight: 760;
+}
+
+.difference-panel span:not(.field-label) {
+  color: #596452;
+  display: block;
+  line-height: 1.6;
+  margin-top: 0.45rem;
 }
 
 a {

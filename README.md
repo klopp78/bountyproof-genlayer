@@ -6,6 +6,20 @@ policy. A claimant then submits issue, pull request, commit, and reproduction
 evidence. GenLayer validators fetch those sources, compare the claim against the
 registered rules, and store a persistent `award_*` verdict receipt.
 
+## Not the same as prior submissions
+
+BountyProof is intentionally scoped to bounty and grant award adjudication. It is
+not a release provenance checker, escrow release gate, model-risk monitor,
+data-consent tool, or policy-change workflow. The contract has its own two-sided
+record model:
+
+- `bounty_*` records are sponsor-created program baselines with reward rules,
+  repository scope, and payout policy commitments;
+- `award_*` records are claimant-created award decisions that bind issue, pull
+  request, commit, and reproduction snapshots to a payout recommendation;
+- validators compare the live claimant evidence against the stored bounty
+  baseline before writing approve, partial, reject, or needs_review receipts.
+
 ## Why it exists
 
 Bounty and grant programs often rely on private spreadsheets, Discord messages,

@@ -25,13 +25,13 @@ export default function Home() {
                 <a className="action-button" href="/records">Inspect records</a>
               </div>
             </div>
-            <div className="escrow-board">
+            <div className="bounty-board">
               <div>
-                <span>Rule baseline</span>
+                <span>Sponsor baseline</span>
                 <strong>Reward rules, repository, and payout policy are snapshotted first</strong>
               </div>
               <div>
-                <span>Claim evidence</span>
+                <span>Claimant package</span>
                 <strong>Issue, PR, commit, and reproduction URLs are fetched by validators</strong>
               </div>
               <div>
@@ -70,6 +70,33 @@ export default function Home() {
           </p>
           <a className="mt-5 inline-block text-sm font-semibold text-[#25614b]" href="/records">Open records</a>
         </article>
+      </section>
+      <section className="mx-auto max-w-6xl px-5 pb-8 lg:px-8">
+        <div className="difference-panel">
+          <span className="field-label">Distinct workflow</span>
+          <h2 className="text-2xl font-semibold">This is not a reused release or risk checker</h2>
+          <p className="mt-3 max-w-4xl leading-7 text-[#596452]">
+            BountyProof is a two-sided bounty adjudication product: sponsors
+            register reward rules before a claim exists, claimants submit
+            issue/PR/commit/reproduction evidence, and the contract stores an
+            award_* payout receipt. It is separate from release provenance,
+            model-risk scoring, data-consent, escrow, or policy-change tools.
+          </p>
+          <div className="mt-5 grid gap-3 md:grid-cols-3">
+            <div>
+              <strong>Bounty scope first</strong>
+              <span>Rules and payout policy are committed before assessment.</span>
+            </div>
+            <div>
+              <strong>Claim evidence bundle</strong>
+              <span>Validators compare four claimant evidence URLs to the stored scope.</span>
+            </div>
+            <div>
+              <strong>Award-specific output</strong>
+              <span>Receipts return approve, partial, reject, or needs_review payout guidance.</span>
+            </div>
+          </div>
+        </div>
       </section>
       <footer className="mx-auto flex max-w-6xl flex-wrap gap-4 px-5 pb-10 text-sm text-[#596452] lg:px-8">
         <a href={repoUrl} rel="noreferrer" target="_blank">Source repository</a>
