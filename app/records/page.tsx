@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { BOUNTY_PROOF_CONTRACT_ADDRESS, readBounty, readClaim } from "@/lib/genlayer";
+import { BOUNTY_PROOF_CONTRACT_ADDRESS, compactError, readBounty, readClaim } from "@/lib/genlayer";
 
 export default function RecordsPage() {
   const [address, setAddress] = useState(BOUNTY_PROOF_CONTRACT_ADDRESS);
@@ -19,7 +19,7 @@ export default function RecordsPage() {
       setRecord(typeof result === "string" ? result : JSON.stringify(result, null, 2));
       setMessage(`Loaded ${kind} record.`);
     } catch (error) {
-      setMessage(error instanceof Error ? error.message : String(error));
+      setMessage(compactError(error));
     }
   }
 

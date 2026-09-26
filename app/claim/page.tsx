@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { assessClaim, BOUNTY_PROOF_CONTRACT_ADDRESS, type WalletAddress } from "@/lib/genlayer";
+import { assessClaim, BOUNTY_PROOF_CONTRACT_ADDRESS, compactError, type WalletAddress } from "@/lib/genlayer";
 
 declare global {
   interface Window {
@@ -50,10 +50,14 @@ export default function ClaimPage() {
         requestedAmount: amount,
         contractAddress: address as `0x${string}`,
       });
-      setRecord(typeof result.claim === "string" ? result.claim : JSON.stringify(result.claim, null, 2));
-      setMessage(`Claim assessment accepted: ${result.claimId}`);
+      setRecord(result.claim
+        ? typeof result.claim === "string" ? result.claim : JSON.stringify(result.claim, null, 2)
+        : JSON.stringify({ claimId: result.claimId, transactionHash: result.hash }, null, 2));
+      setMessage(result.readbackWarning
+        ? `Claim assessment accepted: ${result.claimId}. ${result.readbackWarning}`
+        : `Claim assessment accepted: ${result.claimId}`);
     } catch (error) {
-      setMessage(error instanceof Error ? error.message : String(error));
+      setMessage(compactError(error));
     } finally {
       setBusy(false);
     }
@@ -80,7 +84,7 @@ export default function ClaimPage() {
           <Field id="address" label="Studio contract address" value={address} setValue={setAddress} />
         </div>
         <div className="flex flex-wrap gap-3">
-          <button className="action-button" onClick={() => connectWallet().then(() => setMessage("Wallet connected.")).catch((error) => setMessage(error.message))}>Connect wallet</button>
+          <button className="action-button" onClick={() => connectWallet().then(() => setMessage("Wallet connected.")).catch((error) => setMessage(compactError(error)))}>Connect wallet</button>
           <button className="action-button primary" disabled={busy} onClick={submit}>{busy ? "Awaiting consensus" : "Assess claim"}</button>
         </div>
         <p className="text-sm text-[#596452]">{message}</p>

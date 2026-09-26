@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { BOUNTY_PROOF_CONTRACT_ADDRESS, registerBounty, type WalletAddress } from "@/lib/genlayer";
+import { BOUNTY_PROOF_CONTRACT_ADDRESS, compactError, registerBounty, type WalletAddress } from "@/lib/genlayer";
 
 declare global {
   interface Window {
@@ -48,10 +48,14 @@ export default function BountyPage() {
         payoutPolicyUrl: policyUrl,
         contractAddress: address as `0x${string}`,
       });
-      setRecord(typeof result.bounty === "string" ? result.bounty : JSON.stringify(result.bounty, null, 2));
-      setMessage(`Bounty baseline accepted: ${result.bountyId}`);
+      setRecord(result.bounty
+        ? typeof result.bounty === "string" ? result.bounty : JSON.stringify(result.bounty, null, 2)
+        : JSON.stringify({ bountyId: result.bountyId, transactionHash: result.hash }, null, 2));
+      setMessage(result.readbackWarning
+        ? `Bounty baseline accepted: ${result.bountyId}. ${result.readbackWarning}`
+        : `Bounty baseline accepted: ${result.bountyId}`);
     } catch (error) {
-      setMessage(error instanceof Error ? error.message : String(error));
+      setMessage(compactError(error));
     } finally {
       setBusy(false);
     }
@@ -77,7 +81,7 @@ export default function BountyPage() {
         <Field id="policy" label="Payout policy URL" value={policyUrl} setValue={setPolicyUrl} />
         <Field id="address" label="Studio contract address" value={address} setValue={setAddress} />
         <div className="flex flex-wrap gap-3">
-          <button className="action-button" onClick={() => connectWallet().then(() => setMessage("Wallet connected.")).catch((error) => setMessage(error.message))}>Connect wallet</button>
+          <button className="action-button" onClick={() => connectWallet().then(() => setMessage("Wallet connected.")).catch((error) => setMessage(compactError(error)))}>Connect wallet</button>
           <button className="action-button primary" disabled={busy} onClick={submit}>{busy ? "Awaiting consensus" : "Register bounty"}</button>
         </div>
         <p className="text-sm text-[#596452]">{message}</p>

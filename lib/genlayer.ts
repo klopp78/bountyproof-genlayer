@@ -45,6 +45,17 @@ export function createBountyProofClient(walletAddress?: WalletAddress) {
   });
 }
 
+function createBountyProofWriteClient(walletAddress: WalletAddress) {
+  const provider = typeof window !== "undefined" ? window.ethereum : undefined;
+  if (!provider) throw new Error("No browser wallet detected.");
+
+  return createClient({
+    chain: studionet,
+    account: walletAddress,
+    provider,
+  });
+}
+
 function bountyProofAddress(contractAddress?: `0x${string}`) {
   return contractAddress ?? BOUNTY_PROOF_CONTRACT_ADDRESS;
 }
@@ -82,8 +93,7 @@ export async function registerBounty({
   payoutPolicyUrl,
   contractAddress,
 }: BountyInput) {
-  const client = createBountyProofClient(walletAddress);
-  await client.connect("studionet");
+  const client = createBountyProofWriteClient(walletAddress);
   const address = bountyProofAddress(contractAddress);
   const hash = await client.writeContract({
     address,
@@ -97,9 +107,11 @@ export async function registerBounty({
     status: TransactionStatus.ACCEPTED,
     fullTransaction: true,
   });
-  const bountyId = returnedIdFromReceipt(receipt, "bounty_", "bounty");
-  const bounty = await readBounty(bountyId, { walletAddress, contractAddress: address });
-  return { hash, receipt, bountyId, bounty };
+  const bountyId = idFromReceipt(receipt, /bounty_[a-f0-9]{20}/, "bounty");
+  const { data: bounty, warning: readbackWarning } = await tryReadback(() =>
+    readBounty(bountyId, { walletAddress, contractAddress: address }),
+  );
+  return { hash, receipt, bountyId, bounty, readbackWarning };
 }
 
 export async function assessClaim({
@@ -114,8 +126,7 @@ export async function assessClaim({
   requestedAmount,
   contractAddress,
 }: ClaimInput) {
-  const client = createBountyProofClient(walletAddress);
-  await client.connect("studionet");
+  const client = createBountyProofWriteClient(walletAddress);
   const address = bountyProofAddress(contractAddress);
   const hash = await client.writeContract({
     address,
@@ -129,15 +140,49 @@ export async function assessClaim({
     status: TransactionStatus.ACCEPTED,
     fullTransaction: true,
   });
-  const claimId = returnedIdFromReceipt(receipt, "award_", "claim");
-  const claim = await readClaim(claimId, { walletAddress, contractAddress: address });
-  return { hash, receipt, claimId, claim };
+  const claimId = idFromReceipt(receipt, /award_[a-f0-9]{20}/, "claim");
+  const { data: claim, warning: readbackWarning } = await tryReadback(() =>
+    readClaim(claimId, { walletAddress, contractAddress: address }),
+  );
+  return { hash, receipt, claimId, claim, readbackWarning };
 }
 
-function returnedIdFromReceipt(receipt: unknown, prefix: string, label: string): string {
-  const id = collectStrings(receipt).find((value) => value.startsWith(prefix));
+async function tryReadback<T>(read: () => Promise<T>): Promise<{ data: T | null; warning?: string }> {
+  try {
+    return { data: await read() };
+  } catch (error) {
+    return {
+      data: null,
+      warning: `The transaction was accepted, but the immediate readback was not available yet: ${compactError(error)}`,
+    };
+  }
+}
+
+export function compactError(error: unknown): string {
+  if (error instanceof Error && error.message) return error.message;
+  if (typeof error === "string") return error;
+  if (error && typeof error === "object") {
+    const record = error as Record<string, unknown>;
+    for (const key of ["shortMessage", "message", "reason", "details", "error"]) {
+      const value = record[key];
+      if (typeof value === "string" && value.trim()) return value;
+    }
+  }
+  try {
+    const serialized = JSON.stringify(error);
+    if (serialized && serialized !== "{}") return serialized;
+  } catch {
+    // Fall through to the generic message.
+  }
+  return "Unknown GenLayer transaction error.";
+}
+
+function idFromReceipt(receipt: unknown, pattern: RegExp, label: string): string {
+  const id = collectStrings(receipt)
+    .map((value) => value.match(pattern)?.[0])
+    .find((value): value is string => Boolean(value));
   if (!id) {
-    throw new Error(`Accepted ${label} transaction did not return its ${prefix} ID.`);
+    throw new Error(`Accepted ${label} transaction did not return its ID.`);
   }
   return id;
 }
